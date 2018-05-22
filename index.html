@@ -24,6 +24,8 @@
     <canvas id="pipe_two" width="400" height="500"></canvas>
     <canvas id="bird" width="50" height="50"></canvas>
 </div>
+<script src="./lib/nebPay.js"></script>
+<script src="./lib/nebulas.js"></script>
 <script>
     var canvas_pipe_one = document.getElementById('pipe_one');
     var ctx_pipe_one = canvas_pipe_one.getContext('2d');
@@ -92,6 +94,7 @@
         }
 
         if(isDie()){
+            saveScore('user', 100);
             alert('you died!');
             return;
         }
@@ -161,6 +164,47 @@
             return false;
         }
     }
+
+// var dappAddressTest = 'n1wK9pdeSbTM47S2xywrndU5pGoko2AW3hC';
+var dappAddress ="n1z63UhLwNNacTwHWcj1JaK9w7WLRHhNtPH";
+
+var nebulas = require("nebulas"),
+    Account = nebulas.Account,
+    neb = new nebulas.Neb();
+neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
+
+
+//to check if the extension is installed
+//if the extension is installed, var "webExtensionWallet" will be injected in to web page
+if(typeof(webExtensionWallet) === "undefined"){
+    alert ("https://github.com/ChengOrangeJu/WebExtensionWallet  is not installed, please install it first.")
+}
+
+function saveScore(nickname, score){
+
+
+    var from = Account.NewAccount().getAddressString();
+
+    var value = "0";
+    var nonce = "0"
+    var gas_price = "1000000"
+    var gas_limit = "2000000"
+    var callFunction = "saveScore";
+    var callArgs = '["' + nickname + '",' + score + ']'; //in the form of ["args"]
+    var contract = {
+        "function": callFunction,
+        "args": callArgs
+    }
+
+    neb.api.call(from,dappAddress,value,nonce,gas_price,gas_limit,contract).then(function (resp) {
+        console.log(resp);
+        // cbSearch(resp)
+    }).catch(function (err) {
+        //cbSearch(err)
+        console.log("error:" + err.message)
+    })
+
+}
 </script>
 </body>
 </html>
